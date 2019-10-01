@@ -105,7 +105,7 @@ module EnvConfig
   # This is a convenience method to allow invoking `EnvVar.mapping`
   # with named arguments instead of with a hash/named-tuple literal.
   macro mapping(**properties)
-    ::EnvVar.mapping({{properties}})
+    ::EnvConfig.mapping({{properties}})
   end
 
   private def format(name, value)

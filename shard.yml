@@ -12,3 +12,6 @@ dependencies:
   spec2:
     github: waterlink/spec2.cr
     version: ~> 0.9
+
+  coverage:
+    github: anykeyh/crystal-coverage
