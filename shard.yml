@@ -8,10 +8,9 @@ crystal: 0.31.0
 
 license: MIT
 
-dependencies:
-  spec2:
-    github: waterlink/spec2.cr
-    version: ~> 0.9
+development_dependencies:
+  spectator:
+    gitlab: arctic-fox/spectator
 
   coverage:
     github: anykeyh/crystal-coverage

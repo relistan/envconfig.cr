@@ -1,3 +1,2 @@
-require "spec2"
+require "spectator"
 require "../src/envconfig"
-Spec2.random_order
