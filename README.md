@@ -21,7 +21,7 @@ Crystal.
    ```yaml
    dependencies:
      envconfig:
-       github: relistan/envconfig
+       github: relistan/envconfig.cr
    ```
 
 2. Run `shards install`
