@@ -1,4 +1,14 @@
-# TODO: Write documentation for `Envconfig`
+# envconfig is an environment variable configuration mapper for Crystal. It
+# uses syntax similar to JSON, YAML, and DB shards to map environment variables
+# to a Crystal class. It additionally contains a configuration printer for
+# application startup so that the config values that were interpolated can be
+# displayed for debugging purposes.
+#
+# Macros are used to handle most of the important operations, similary to JSON,
+# YAML, and DB mapping macros. This `EnvConfig` module contains all the macros
+# and necessary functions to operate the library.
+#
+# The normal entrypoint for code is the `mapping` macro.
 module EnvConfig
   VERSION = "0.1.0"
 
@@ -32,7 +42,24 @@ module EnvConfig
   end
 
   # Mapping does most of the work figuring out how to configure
-  # and set the properties.
+  # and set the properties. It is to be called from inside a class
+  # you define in your code. The resultant properties are turned
+  # into properties on the class. Example Usage:
+  #
+  # ```
+  # class Config
+  #   EnvConfig.mapping({
+  #     prefix:      {type: String, default: "l/", nilable: false},
+  #     redis_host:  {type: String, default: "localhost", nilable: false},
+  #     redis_port:  {type: Int32,  default: "6379", nilable: false},
+  #     redis_pool:  {type: Int32,  default: "200", nilable: false},
+  #     listen_port: {type: Int32,  default: "8087", nilable: false},
+  #     default_url: {type: String, nilable: false},
+  #     ssl_urls:    {type: Bool,   default: "false", nilable: false},
+  #     }, "CHOP"
+  #   )
+  # end
+  # ```
   macro mapping(properties, prefix = "")
     include EnvConfig
 
