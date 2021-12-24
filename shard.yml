@@ -1,16 +1,17 @@
 name: envconfig
-version: 0.1.0
+version: 0.2.0
 
 authors:
   - Karl Matthias <karl@matthias.org>
 
-crystal: 0.31.0
+crystal: 1.0.0
 
 license: MIT
 
 development_dependencies:
   spectator:
     gitlab: arctic-fox/spectator
+    version: ~> 0.10.3
 
   coverage:
     github: anykeyh/crystal-coverage
