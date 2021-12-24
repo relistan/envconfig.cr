@@ -12,9 +12,8 @@
 module EnvConfig
   VERSION = "0.1.0"
 
-  # Fetch a key from the environment, or set a default if the key
-  # is missing. If the default is nil, abort and request that the
-  # required key be set.
+  # Fetch a key from the environment, or set a default if the key is missing.
+  # If the default is nil, abort and request that the required key be set.
   def get_env(key : String, default : String?, nilable : Bool) : String?
     ENV[key]
   rescue KeyError
@@ -30,9 +29,8 @@ module EnvConfig
     value == "true" || value[0].downcase == "t"
   end
 
-  # Determine the lookup key for this field in the environment
-  # consists of an upper case of the field name prefixed by any
-  # specified prefix.
+  # Determine the lookup key for this field in the environment consists of an
+  # upper case of the field name prefixed by any specified prefix.
   def key_for(name)
     if get_env_prefix().empty?
       name.to_s.upcase
@@ -41,27 +39,29 @@ module EnvConfig
     end
   end
 
-  # Mapping does most of the work figuring out how to configure
-  # and set the properties. It is to be called from inside a class
-  # you define in your code. The resultant properties are turned
-  # into properties on the class. Example Usage:
+  # Mapping does most of the work figuring out how to configure and set the
+  # properties. It is to be called from inside a class you define in your code.
+  # The resultant properties are turned into properties on the class. Example
+  # Usage:
   #
   # ```
   # class Config
   #   EnvConfig.mapping({
   #     prefix:      {type: String, default: "l/", nilable: false},
   #     redis_host:  {type: String, default: "localhost", nilable: false},
-  #     redis_port:  {type: Int32,  default: "6379", nilable: false},
-  #     redis_pool:  {type: Int32,  default: "200", nilable: false},
-  #     listen_port: {type: Int32,  default: "8087", nilable: false},
+  #     redis_port:  {type: Int32, default: "6379", nilable: false},
+  #     redis_pool:  {type: Int32, default: "200", nilable: false},
+  #     listen_port: {type: Int32, default: "8087", nilable: false},
   #     default_url: {type: String, nilable: false},
-  #     ssl_urls:    {type: Bool,   default: "false", nilable: false},
-  #     }, "CHOP"
+  #     ssl_urls:    {type: Bool, default: "false", nilable: false},
+  #   }, "CHOP"
   #   )
   # end
   # ```
   macro mapping(properties, prefix = "")
     include EnvConfig
+
+    setter out_io : IO
 
     def get_env_prefix()
       "{{prefix.id}}"
@@ -116,16 +116,35 @@ module EnvConfig
           {% end %}
         end
       {% end %}
+
+      @out_io = STDOUT
     end
 
-    # print_config will print out a little formatted dump of all the
-    # settings and their current value. Ideal for application startup.
+    # print_config will print out a little formatted dump of all the settings
+    # and their current value. Ideal for application startup.
     def print_config
-      puts "Settings " + "-"*45
+      header
+
       {% for key, _v in properties %}
-        format "{{key}}", @{{key}}
+        format("{{key}}", @{{key}}.inspect)
       {% end %}
-      puts "" + "-"*55
+
+      footer
+    end
+
+    # print_config can optionally take a block that is used to obfuscate
+    # strings that should not be displayed in the config output. This block
+    # will be passed the key and the value and is expected to return the output
+    # string to display.
+    def print_config(&block : String, Int32 | Int64 | Float32 | Float64 | Bool | String | Nil -> String)
+      header
+
+      {% for key, _v in properties %}
+        value = block.call("{{key}}", @{{key}})
+        format("{{key}}", value)
+      {% end %}
+
+      footer
     end
   end
 
@@ -136,6 +155,14 @@ module EnvConfig
   end
 
   private def format(name, value)
-    puts "  * " + "%20s" % "#{name}: " + value.inspect
+    @out_io.puts "  * " + "%20s" % "#{name}: " + value
+  end
+
+  private def header
+    @out_io.puts "Settings " + "-"*45
+  end
+
+  private def footer
+    @out_io.puts "" + "-"*55
   end
 end

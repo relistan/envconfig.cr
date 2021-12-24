@@ -68,4 +68,39 @@ Spectator.describe EnvConfig do
       end
     end
   end
+
+  describe "when printing output" do
+    it "works fine without a block" do
+      output = IO::Memory.new
+
+      ENV["TEST_DEFAULT_URL"] = default_url
+      config = TestConfig.new
+      config.out_io = output
+      config.print_config
+
+      expect(output.to_s).to match(/^Settings ---/)
+      expect(output.to_s.size).to eq(366)
+    end
+
+    it "calls an obfuscator block if there is one" do
+      ENV["TEST_DEFAULT_URL"] = default_url
+
+      output = IO::Memory.new
+
+      config = TestConfig.new
+      config.out_io = output
+      config.print_config do |key, val|
+        if key =~ /redis/
+          "xx#{val}xx"
+        else
+          val.inspect
+        end
+      end
+
+      expect(output.to_s).to match(/redis_host: xxlocalhostxx/)
+      expect(output.to_s).to match(/redis_port: xx6379xx/)
+      expect(output.to_s).to match(/redis_pool: xx200xx/)
+      expect(output.to_s.size).to eq(376)
+    end
+  end
 end

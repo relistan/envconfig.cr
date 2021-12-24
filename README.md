@@ -76,6 +76,21 @@ Settings ---------------------------------------------
 
 This is useful when debugging what was actually set.
 
+You may optionally pass a block to `print_config` that will be used to
+obfuscate config values that should not be displayed. This is a block that will
+be passed the key and value for each and is expected to return a string.
+Something like:
+
+```
+config.print_config do |key, val|
+  if key =~ /redis/
+    "xxxx"
+  else
+    val.inspect
+  end
+end
+```
+
 ## Contributing
 
 1. Fork it (<https://github.com/your-github-user/envconfig/fork>)
