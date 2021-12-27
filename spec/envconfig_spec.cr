@@ -69,6 +69,25 @@ Spectator.describe EnvConfig do
     end
   end
 
+  describe "when showing help" do
+    it "shows help" do
+      output = IO::Memory.new
+
+      ENV["TEST_DEFAULT_URL"] = default_url
+      config = TestConfig.new
+      config.out_io = output
+      config.help
+
+      expect(output.to_s).to match(/TEST_PREFIX \(String\) - l\//)
+      expect(output.to_s).to match(/TEST_REDIS_HOST \(String\) - localhost/)
+      expect(output.to_s).to match(/TEST_REDIS_PORT \(Int32\) - 6379/)
+      expect(output.to_s).to match(/TEST_REDIS_POOL \(Int32\) - 200/)
+      expect(output.to_s).to match(/TEST_DEFAULT_URL \(String\) - \*REQUIRED\*/)
+      expect(output.to_s).to match(/TEST_LISTEN_PORT \(Int32\) - 8087/)
+      expect(output.to_s).to match(/TEST_SSL_URLS \(Bool\) - false/)
+    end
+  end
+
   describe "when printing output" do
     it "works fine without a block" do
       output = IO::Memory.new

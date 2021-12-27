@@ -39,6 +39,18 @@ module EnvConfig
     end
   end
 
+  def format(name, value)
+    @out_io.puts "  * " + "%20s" % "#{name}: " + value
+  end
+
+  def header
+    @out_io.puts "Settings " + "-"*45
+  end
+
+  def footer
+    @out_io.puts "" + "-"*55
+  end
+
   # Mapping does most of the work figuring out how to configure and set the
   # properties. It is to be called from inside a class you define in your code.
   # The resultant properties are turned into properties on the class. Example
@@ -120,6 +132,35 @@ module EnvConfig
       @out_io = STDOUT
     end
 
+    # help generates help output suitable for use as a CLI help output. Useful
+    # for apps that are callable on the CLI and want to provide help.
+    def help
+      @out_io.puts
+      footer
+      @out_io.puts "Usage:\n"
+      @out_io.puts "  The following vars apply. Types and defaults shown:"
+      @out_io.puts
+
+      {% for key, v in properties %}
+        type = {{ v[:type].stringify }}
+
+        key = key_for("{{key}}")
+        desc = {{v[:default]}}
+        nilable = {{v[:nilable]}}
+
+        unless desc
+          if !nilable
+            desc = "*REQUIRED*"
+          else
+            desc = "*NIL*"
+          end
+        end
+
+        @out_io.puts " * #{key} (#{type}) - #{desc}"
+      {% end %}
+      footer
+    end
+
     # print_config will print out a little formatted dump of all the settings
     # and their current value. Ideal for application startup.
     def print_config
@@ -152,17 +193,5 @@ module EnvConfig
   # with named arguments instead of with a hash/named-tuple literal.
   macro mapping(**properties)
     ::EnvConfig.mapping({{properties}})
-  end
-
-  private def format(name, value)
-    @out_io.puts "  * " + "%20s" % "#{name}: " + value
-  end
-
-  private def header
-    @out_io.puts "Settings " + "-"*45
-  end
-
-  private def footer
-    @out_io.puts "" + "-"*55
   end
 end

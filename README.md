@@ -60,6 +60,33 @@ the `JSON` module in the stdlib.
 The final argument to `mapping()` is a prefix to place in front of all your
 environment variables to prevent namespace collisions.
 
+### Printing Help Output
+
+You may call the `help()` method to generate Usage information, including the
+available settings and types, and their default values. It looks like this:
+
+```
+-------------------------------------------------------
+Usage:
+  The following vars apply. Types and defaults shown:
+
+ * TEST_PREFIX (String) - l/
+ * TEST_REDIS_HOST (String) - localhost
+ * TEST_REDIS_PORT (Int32) - 6379
+ * TEST_REDIS_POOL (Int32) - 200
+ * TEST_LISTEN_PORT (Int32) - 8087
+ * TEST_DEFAULT_URL (String) - *REQUIRED*
+ * TEST_SSL_URLS (Bool) - false
+ * TEST_UNSET_THING (Int64) - *NIL*
+-------------------------------------------------------
+
+```
+
+Fields that are `nilable` and have no `default` show `*NIL*`, while those
+without defaults that are _not_ `nilable` show `*REQUIRED*`.
+
+### Printing Current Settings
+
 Output from the pretty-printer `print_config()` looks like this:
 
 ```
