@@ -124,6 +124,8 @@ module EnvConfig
 
         out_io.puts "    #{key} (#{type}) - #{help} [#{desc}]"
       {% end %}
+
+      puts
     end
 
     def initialize()
