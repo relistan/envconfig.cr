@@ -35,13 +35,13 @@ require "envconfig"
 ```crystal
 class TestConfig
   EnvConfig.mapping({
-    prefix:      {type: String, default: "l/", nilable: false},
-    redis_host:  {type: String, default: "localhost", nilable: false},
-    redis_port:  {type: Int32,  default: "6379", nilable: false},
-    redis_pool:  {type: Int32,  default: "200", nilable: false},
-    listen_port: {type: Int32,  default: "8087", nilable: false},
-    default_url: {type: String, nilable: false},
-    ssl_urls:    {type: Bool,   default: "false", nilable: false},
+    prefix:      {type: String, default: "l/", nilable: false, help: "URL prefix for redirects"},
+    redis_host:  {type: String, default: "localhost", nilable: false, help: "Redis hostname to connect to"},
+    redis_port:  {type: Int32,  default: "6379", nilable: false, help: "Redis port to connect to"},
+    redis_pool:  {type: Int32,  default: "200", nilable: false, help: "Redis connection pool size"},
+    listen_port: {type: Int32,  default: "8087", nilable: false, help: "Port to listen on"},
+    default_url: {type: String, nilable: false, help: "The default redirect URL"},
+    ssl_urls:    {type: Bool,   default: "false", nilable: false, help: "Generate HTTPS URLs?"},
     unset_thing: {type: Int64,  nilable: true}
     }, "TEST"
   )
@@ -62,28 +62,31 @@ environment variables to prevent namespace collisions.
 
 ### Printing Help Output
 
-You may call the `help()` method to generate Usage information, including the
-available settings and types, and their default values. It looks like this:
+You may call the generated class method `help()` method to generate Usage
+information, including the available settings and types, and their default
+values. It looks like this:
 
 ```
--------------------------------------------------------
 Usage:
   The following vars apply. Types and defaults shown:
 
- * TEST_PREFIX (String) - l/
- * TEST_REDIS_HOST (String) - localhost
- * TEST_REDIS_PORT (Int32) - 6379
- * TEST_REDIS_POOL (Int32) - 200
- * TEST_LISTEN_PORT (Int32) - 8087
- * TEST_DEFAULT_URL (String) - *REQUIRED*
- * TEST_SSL_URLS (Bool) - false
- * TEST_UNSET_THING (Int64) - *NIL*
--------------------------------------------------------
-
+    TEST_PREFIX (String) - URL Prefix for redirects [l/]
+    TEST_REDIS_HOST (String) - Redis hostname [localhost]
+    TEST_REDIS_PORT (Int32) - Redis port [6379]
+    TEST_REDIS_POOL (Int32) - Redis pool size [200]
+    TEST_LISTEN_PORT (Int32) - Port to listen on [8087]
+    TEST_DEFAULT_URL (String) - Default URL to send redirects to [*REQUIRED*]
+    TEST_SSL_URLS (Bool) - Generate HTTPS URLs? [false]
+    TEST_UNSET_THING (Int64) -  [*NIL*]
 ```
+
+You call it e.g. `TestConfig.help()` as a class method, *not* an instance
+method. This prevents having to initialize all the fields before printing.
 
 Fields that are `nilable` and have no `default` show `*NIL*`, while those
 without defaults that are _not_ `nilable` show `*REQUIRED*`.
+
+The displayed text comes from the `help` field in the mapping definition.
 
 ### Printing Current Settings
 

@@ -2,13 +2,13 @@ require "./spec_helper"
 
 class TestConfig
   EnvConfig.mapping({
-    prefix:      {type: String, default: "l/", nilable: false},
-    redis_host:  {type: String, default: "localhost", nilable: false},
-    redis_port:  {type: Int32, default: "6379", nilable: false},
-    redis_pool:  {type: Int32, default: "200", nilable: false},
-    listen_port: {type: Int32, default: "8087", nilable: false},
-    default_url: {type: String, nilable: false},
-    ssl_urls:    {type: Bool, default: "false", nilable: false},
+    prefix:      {type: String, default: "l/", nilable: false, help: "URL Prefix for redirects"},
+    redis_host:  {type: String, default: "localhost", nilable: false, help: "Redis hostname"},
+    redis_port:  {type: Int32, default: "6379", nilable: false, help: "Redis port"},
+    redis_pool:  {type: Int32, default: "200", nilable: false, help: "Redis pool size"},
+    listen_port: {type: Int32, default: "8087", nilable: false, help: "Port to listen on"},
+    default_url: {type: String, nilable: false, help: "Default URL to send redirects to"},
+    ssl_urls:    {type: Bool, default: "false", nilable: false, help: nil},
     unset_thing: {type: Int64, nilable: true},
   }, "TEST"
   )
@@ -70,21 +70,18 @@ Spectator.describe EnvConfig do
   end
 
   describe "when showing help" do
-    it "shows help" do
+    it "shows help when help() is called" do
       output = IO::Memory.new
+      TestConfig.help(output)
+      TestConfig.help
 
-      ENV["TEST_DEFAULT_URL"] = default_url
-      config = TestConfig.new
-      config.out_io = output
-      config.help
-
-      expect(output.to_s).to match(/TEST_PREFIX \(String\) - l\//)
-      expect(output.to_s).to match(/TEST_REDIS_HOST \(String\) - localhost/)
-      expect(output.to_s).to match(/TEST_REDIS_PORT \(Int32\) - 6379/)
-      expect(output.to_s).to match(/TEST_REDIS_POOL \(Int32\) - 200/)
-      expect(output.to_s).to match(/TEST_DEFAULT_URL \(String\) - \*REQUIRED\*/)
-      expect(output.to_s).to match(/TEST_LISTEN_PORT \(Int32\) - 8087/)
-      expect(output.to_s).to match(/TEST_SSL_URLS \(Bool\) - false/)
+      expect(output.to_s).to match(/TEST_PREFIX \(String\) - URL Prefix for redirects \[l\/\]/)
+      expect(output.to_s).to match(/TEST_REDIS_HOST \(String\) - Redis hostname \[localhost\]/)
+      expect(output.to_s).to match(/TEST_REDIS_PORT \(Int32\) -.*\[6379\]/)
+      expect(output.to_s).to match(/TEST_REDIS_POOL \(Int32\) -.*\[200\]/)
+      expect(output.to_s).to match(/TEST_DEFAULT_URL \(String\) -.*\[\*REQUIRED\*\]/)
+      expect(output.to_s).to match(/TEST_LISTEN_PORT \(Int32\) -.*\[8087\]/)
+      expect(output.to_s).to match(/TEST_SSL_URLS \(Bool\) -.*\[false\]/)
     end
   end
 

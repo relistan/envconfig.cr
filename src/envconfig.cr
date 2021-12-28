@@ -29,16 +29,6 @@ module EnvConfig
     value == "true" || value[0].downcase == "t"
   end
 
-  # Determine the lookup key for this field in the environment consists of an
-  # upper case of the field name prefixed by any specified prefix.
-  def key_for(name)
-    if get_env_prefix().empty?
-      name.to_s.upcase
-    else
-      "#{get_env_prefix()}_#{name}".upcase
-    end
-  end
-
   def format(name, value)
     @out_io.puts "  * " + "%20s" % "#{name}: " + value
   end
@@ -75,16 +65,12 @@ module EnvConfig
 
     setter out_io : IO
 
-    def get_env_prefix()
-      "{{prefix.id}}"
-    end
-
     {% for key, value in properties %}
       {% properties[key] = {type: value} unless value.is_a?(HashLiteral) || value.is_a?(NamedTupleLiteral) %}
     {% end %}
 
     {% for key, value in properties %}
-      @{{key.id}} : {{value[:type]}} {{ (value[:nilable] ? "?" : "").id }}
+      #@{{key.id}} : {{value[:type]}} {{ (value[:nilable] ? "?" : "").id }}
 
       {% if value[:setter] == nil ? true : value[:setter] %}
         def {{key.id}}=(_{{key.id}} : {{value[:type]}} {{ (value[:nilable] ? "?" : "").id }})
@@ -99,9 +85,50 @@ module EnvConfig
       {% end %}
     {% end %}
 
+    def self.get_env_prefix()
+      "{{prefix.id}}"
+    end
+
+    # Determine the lookup key for this field in the environment consists of an
+    # upper case of the field name prefixed by any specified prefix.
+    def self.key_for(name)
+      if self.get_env_prefix().empty?
+        name.to_s.upcase
+      else
+        "#{self.get_env_prefix()}_#{name}".upcase
+      end
+    end
+
+    # help generates utput suitable for use as a CLI help. Useful for apps that
+    # are callable on the CLI and want to provide help.
+    def self.help(out_io = STDOUT)
+      out_io.puts
+      out_io.puts "Usage:\n"
+      out_io.puts "  The following vars apply. Types and defaults shown:"
+      out_io.puts
+
+      {% for key, v in properties %}
+        key = key_for("{{key}}")
+        desc = {{v[:default]}}
+        nilable = {{v[:nilable]}}
+        type = {{v[:type].stringify}}
+        help = {{v[:help]}}
+
+        unless desc
+          if !nilable
+            desc = "*REQUIRED*"
+          else
+            desc = "*NIL*"
+          end
+        end
+
+        out_io.puts "    #{key} (#{type}) - #{help} [#{desc}]"
+      {% end %}
+    end
+
     def initialize()
       {% for key, value in properties %}
-        key = key_for("{{key}}")
+        key = self.class.key_for("{{key}}")
         result = get_env(key, {{value[:default]}}, {{value[:nilable]}})
 
         {% type = value[:type].stringify %}
@@ -130,35 +157,6 @@ module EnvConfig
       {% end %}
 
       @out_io = STDOUT
-    end
-
-    # help generates help output suitable for use as a CLI help output. Useful
-    # for apps that are callable on the CLI and want to provide help.
-    def help
-      @out_io.puts
-      footer
-      @out_io.puts "Usage:\n"
-      @out_io.puts "  The following vars apply. Types and defaults shown:"
-      @out_io.puts
-
-      {% for key, v in properties %}
-        type = {{ v[:type].stringify }}
-
-        key = key_for("{{key}}")
-        desc = {{v[:default]}}
-        nilable = {{v[:nilable]}}
-
-        unless desc
-          if !nilable
-            desc = "*REQUIRED*"
-          else
-            desc = "*NIL*"
-          end
-        end
-
-        @out_io.puts " * #{key} (#{type}) - #{desc}"
-      {% end %}
-      footer
     end
 
     # print_config will print out a little formatted dump of all the settings
