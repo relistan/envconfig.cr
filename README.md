@@ -4,17 +4,24 @@ An environment variable configuration mapper for Crystal. Uses syntax similar
 to JSON, YAML, and DB shards to map environment variables to a Crystal class.
 It's small.
 
-Includes configuration printer for application startup as well.
+Features:
+
+ * Automatic conversion from env vars to config settings with type conversion
+ * Default values that can be overridden
+ * Required fields
+ * Optional fields
+ * CLI help output
+ * Application configuration printing with redaction
 
 ### What Problem Does This Solve?
 
-Containerized application or other 12-factor apps often rely on environment
+Containerized applications or other 12-factor apps often rely on environment
 variables to configure themselves. Repeatedly writing code to read variables
-from `ENV[]` and then manually do type conversion, nil checking, etc is just
+from `ENV[]` and then manually doing type conversion, nil checking, etc is just
 annoying.
 
 Application configs commonly need the same sets of utility methods, as well.
-Thingsl ike CLI help output, and startup config printing (with redaction).
+Things like CLI help output, and startup config printing (with redaction).
 
 Other languages have packages for making this easy. Here's one for Crystal. 
 
@@ -66,9 +73,10 @@ environment variables to prevent namespace collisions.
 
 ### Printing Help Output
 
-You may call the generated class method `help()` method to generate Usage
-information, including the available settings and types, and their default
-values. It looks like this:
+You may call the generated class method `help()` to generate usage information,
+including the available settings and types, and their default values. If the
+`help` symbol is included in the mapping, its text will also be displayed. It
+looks like this:
 
 ```
 Usage:
@@ -86,7 +94,7 @@ Usage:
 
 You call it e.g. `TestConfig.help()` as a class method, *not* an instance
 method. This prevents having to initialize all the fields before printing.
-Example usage:
+Example usage in an application:
 
 ```
 (TestConfig.help; exit 1) if !ARGV.empty? && ["-h", "--help", "-help"].includes?(ARGV[0])
