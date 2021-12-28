@@ -11,8 +11,12 @@ Includes configuration printer for application startup as well.
 Containerized application or other 12-factor apps often rely on environment
 variables to configure themselves. Repeatedly writing code to read variables
 from `ENV[]` and then manually do type conversion, nil checking, etc is just
-annoying. Other languages have packages for making this easy. Here's one for
-Crystal. 
+annoying.
+
+Application configs commonly need the same sets of utility methods, as well.
+Thingsl ike CLI help output, and startup config printing (with redaction).
+
+Other languages have packages for making this easy. Here's one for Crystal. 
 
 ## Installation
 
@@ -82,6 +86,11 @@ Usage:
 
 You call it e.g. `TestConfig.help()` as a class method, *not* an instance
 method. This prevents having to initialize all the fields before printing.
+Example usage:
+
+```
+(TestConfig.help; exit 1) if !ARGV.empty? && ["-h", "--help", "-help"].includes?(ARGV[0])
+```
 
 Fields that are `nilable` and have no `default` show `*NIL*`, while those
 without defaults that are _not_ `nilable` show `*REQUIRED*`.
