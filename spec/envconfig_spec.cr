@@ -14,6 +14,15 @@ class TestConfig
   )
 end
 
+# There are two ways to define the mapping, this simply validates that the
+# second method is working.
+class SimpleConfig
+  EnvConfig.mapping(
+    name: {type: String, default: "beowulf", nilable: false, help: "The warrior's name"},
+    is_awesome: {type: Bool, default: "true", nilable: false, help: "Whether they are awesome"}
+  )
+end
+
 Spectator.describe EnvConfig do
   before_each do
     # Clean up the things we set in some of the tests. Otherwise, random
@@ -69,11 +78,10 @@ Spectator.describe EnvConfig do
     end
   end
 
-  describe "when showing help" do
-    it "shows help when help() is called" do
+  describe "when showing help()" do
+    it "properly outputs all the fields and help text" do
       output = IO::Memory.new
       TestConfig.help(output)
-      TestConfig.help
 
       expect(output.to_s).to match(/TEST_PREFIX \(String\) - URL Prefix for redirects \[l\/\]/)
       expect(output.to_s).to match(/TEST_REDIS_HOST \(String\) - Redis hostname \[localhost\]/)
@@ -82,6 +90,14 @@ Spectator.describe EnvConfig do
       expect(output.to_s).to match(/TEST_DEFAULT_URL \(String\) -.*\[\*REQUIRED\*\]/)
       expect(output.to_s).to match(/TEST_LISTEN_PORT \(Int32\) -.*\[8087\]/)
       expect(output.to_s).to match(/TEST_SSL_URLS \(Bool\) -.*\[false\]/)
+    end
+
+    it "shows help properly for the second mapping() definition" do
+      output = IO::Memory.new
+      SimpleConfig.help(output)
+
+      expect(output.to_s).to match(/ IS_AWESOME \(Bool\)/)
+      expect(output.to_s).to match(/ NAME \(String\)/)
     end
   end
 
