@@ -131,7 +131,7 @@ module EnvConfig
     def initialize()
       {% for key, value in properties %}
         key = self.class.key_for("{{key}}")
-        result = get_env(key, {{value[:default]}}, {{value[:nilable]}})
+        result = get_env(key, {{value[:default]}}, {{value[:nilable] || false}})
 
         {% type = value[:type].stringify %}
 
